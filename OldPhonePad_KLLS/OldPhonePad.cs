@@ -1,56 +1,71 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Text;
-using System.Xml;
-
-namespace OldPhonePad
+﻿namespace OldPhonePad
 {
     public class OldPhonePadFunctions
     {
+        /// <summary>
+        /// Display output according to input like old key pad phone.
+        /// </summary>
+        /// <example>
+        /// OldPhonePad("33#") => output: E
+        /// OldPhonePad("227*#") => output: B
+        /// OldPhonePad("4433555 555666#") => output: HELLO
+        /// OldPhonePad("8 88777444666*664#") => output: TURING
+        /// </example>
+        /// <param name="input message"></param>
+        /// <returns>message to be showed</returns>
 
-        public static String OldPhonePad(string typeMessages)
+        public static string OldPhonePad(string typeMessages)
         {
-            String completeOutput="";
-            if(typeMessages != null && typeMessages != "")
-            { 
-             string[] spaceSplit = typeMessages.Split(' ');
+            String completeOutput = "";
+            if (typeMessages != null)
+            {
+                // split message with space
+                string[] spaceSplit = typeMessages.Split(' ');
                 for (int i = 0; i < spaceSplit.Length; i++)
                 {
-                    Console.WriteLine("Space Split : " + spaceSplit[i]);
                     OldPhonePadFunctions opp = new OldPhonePadFunctions();
+
+                    //seperate message with identical chars
                     List<string> parts = opp.seperate(spaceSplit[i]);
                     for (int j = 0; j < parts.Count; j++)
                     {
-                        Console.WriteLine("wording......" + parts[j]);
+                        //get count of identical chars
                         int chCount = opp.getCounts(parts[j]);
                         char ch = parts[j][0];
+                        //if input is '*', delete chars based on count of *.
                         if (ch == '*')
                         {
                             if (completeOutput.Length > 0)
                             {
                                 for (int k = 0; k < chCount; k++)
-                                {
-                                    completeOutput = completeOutput.Remove(completeOutput.Length - 1);
-                                    Console.WriteLine("After Removing..........." + completeOutput);
-                                }
+                                   completeOutput = completeOutput.Remove(completeOutput.Length - 1);                             
                             }
                         }
+                        //if input is '#', no need to take consideration.
+                        else if (ch == '#')
+                        {
+                            if (completeOutput.Length > 0)
+                               completeOutput = completeOutput.Remove(completeOutput.Length);                            
+                        }
+                        //if input is others, show char accordingly.
                         else
                         {
                             ch = opp.displayChar(ch, chCount);
                             completeOutput += ch;
-                            Console.WriteLine("Complete Output..........." + completeOutput);
                         } //end of checking if character is *
                     } // end of for loop parts                    
                 } // end of for loop spacesplit
-             } // end of checking if string is null or empty
-            else completeOutput = "No input or No words to Display";
+            } // end of checking if string is null or empty
+            else completeOutput = "Null Input";
             return completeOutput;
         }
-
-        public char displayChar(char inputChar, int charCount)
+        /// <summary>
+        /// Display char according to input number and its count.
+        /// </summary>
+        /// <param name="inputChar">Input Number</param>
+        /// <param name="charCount">Number Count</param>
+        /// <returns>Resulted Char</returns>
+        private char displayChar(char inputChar, int charCount)
         {
             char displayChar = '\0';
             switch (inputChar)
@@ -89,7 +104,7 @@ namespace OldPhonePad
                     if (charCount == 1) displayChar = 'P';
                     else if (charCount == 2) displayChar = 'Q';
                     else if (charCount == 3) displayChar = 'R';
-                    else displayChar = 'O';
+                    else displayChar = 'S';
                     break;
                 case '8':
                     if (charCount == 1) displayChar = 'T';
@@ -102,13 +117,22 @@ namespace OldPhonePad
                     else if (charCount == 3) displayChar = 'Y';
                     else displayChar = 'Z';
                     break;
+                case '0':
+                    displayChar = ' ';
+                    break;
+
             }
             return displayChar;
         }
-
-        public int getCounts(string input)
+        /// <summary>
+        /// Get the count of inputs.
+        /// </summary>
+        /// <param name="input">identical number sequence</param>
+        /// <returns></returns>
+        private int getCounts(string input)
         {
-            int inputcount=input.Length;
+            int inputcount = input.Length;
+            //Remainder is calculated if more than 4 in the case of 7 and 9.
             if (input.StartsWith('7') || input.StartsWith('9'))
             {
                 if (input.Length > 4)
@@ -116,9 +140,10 @@ namespace OldPhonePad
                     inputcount = input.Length % 4;
                 }
             }
+            //Remainder is calculated if more than 3 in the case of others.
             else
             {
-                if (input.Length > 4)
+                if (input.Length > 3)
                 {
                     inputcount = input.Length % 3;
                 }
@@ -126,101 +151,44 @@ namespace OldPhonePad
             }
             return inputcount;
         }
-
-        public List<String> seperate(string squences)
+        /// <summary>
+        /// Generate String List of Identical Chars.
+        /// </summary>
+        /// <param name="sequences">input string</param>
+        /// <returns>String List of Identical Chars</returns>
+        private List<String> seperate(string sequences)
         {
             List<string> individual = new List<string>();
-            char[] chars = squences.ToCharArray();
-            string temp = chars[0].ToString();
-            
-            for (int i = 1; i < chars.Length; i++)
+            char[] chars = sequences.ToCharArray();
+            if (chars.Length > 0)
             {
-                if (chars[i - 1] != chars[i])
+                string temp = chars[0].ToString();
+
+                for (int i = 1; i < chars.Length; i++)
                 {
-                    individual.Add(temp);
-                    temp = chars[i].ToString();
+                    if (chars[i - 1] != chars[i])
+                    {
+                        individual.Add(temp);
+                        temp = chars[i].ToString();
+                    }
+                    else
+                    {
+                        temp += chars[i];
+                    }
+
                 }
-                else
-                {
-                    temp += chars[i];
-                }
-               
+                individual.Add(temp);
             }
-            individual.Add(temp);
-            return individual; 
+            return individual;
         }
-        public string showChars(string splitMessage)
-        {
-            char[] chars = splitMessage.ToCharArray();
-            String temp = "";
-            for (int i = chars.Length-1; i>-1; i--)
-            {
-                Console.WriteLine("i:" + i + " value:" + chars[i]);
-                switch (chars[i])
-                {                    
-                    case '1':
-                        if (chars[i - 2] == '1' && chars[i - 1] == '1') temp = '('+temp;
-                        else if (chars[i - 1] == '1') temp='\''+ temp;
-                        else temp='&'+temp;
-                        break;
-                    case '2':
-                        if (i - 2 == '2' && i - 1 == '2') temp = 'C' + temp;
-                        else if (i - 1 == '2') temp = 'B' + temp;
-                        else temp = 'A' + temp;
-                        break;
-                    case '3':
-                        if (i - 2 == '3' && i - 1 =='3') temp = 'F' + temp;
-                        else if (i - 1 == '3') temp = 'E' + temp;
-                        else temp = 'D' + temp;
-                        break;
-                    case '4':
-                        if (i - 2 == '4' && i - 1 == '4') temp = 'I' + temp;
-                        else if (i - 1 == '4') temp = 'H' + temp;
-                        else temp = 'G' + temp;
-                        break;
-                    case '5':
-                        if (i - 2 == '5' && i - 1 == '5') temp = 'L' + temp;
-                        else if (i - 1 == '5') temp = 'K' + temp;
-                        else temp = 'J' + temp;
-                        break;
-                    case '6':
-                        if (i - 2 == '6' && i - 1 == '6') temp = 'O' + temp;
-                        else if (i - 1 == '6') temp = 'N' + temp;
-                        else temp = 'M' + temp;
-                        break;
-                    case '7':
-                        if (i-3=='7' && i - 2 == '7' && i - 1 == '7') temp = 'S' + temp;
-                        else if (i - 2 == '7' && i - 1 == '7') temp = 'R' + temp;
-                        else if (i - 1 == '7') temp = 'Q' + temp;
-                        else temp = 'P' + temp;
-                        break;
-                    case '8':
-                        if (i - 2 == '8' && i - 1 == '8') temp = 'V' + temp;
-                        else if (i - 1 == '8') temp = 'U' + temp;
-                        else temp = 'T' + temp;
-                        break;
-                    case '9':
-                        if (i - 3 == '9' && i - 2 == '9' && i - 1 == '9') temp = 'Z' + temp;
-                        else if (i - 2 == '9' && i - 1 == '9') temp = 'Y' + temp;
-                        else if (i - 1 == '9') temp = 'X' + temp;
-                        else temp = 'W' + temp;
-                        break;
-                    case '*':
-                        temp.Remove(temp.Length-1);
-                        break;
-                    case ' ': break;
-                    default: 
-                        break;
-                }
-            }
-            return temp;
-        }
-       
+        /// <summary>
+        /// Main Function
+        /// </summary>
+        /// <param name="args">input</param>
         static void Main(string[] args)
         {
-            String display= OldPhonePadFunctions.OldPhonePad("8 88 777444666*664#");
+            String display = OldPhonePadFunctions.OldPhonePad("      ");
             Console.WriteLine(display);
-
         }
     }
 }
